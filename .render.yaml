@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: n8n-selfhosted
+    env: docker
+    dockerfilePath: ./Dockerfile
+    buildCommand: "" # Pas besoin de build command si Dockerfile est présent
+    startCommand: "" # Démarrage géré par CMD dans Dockerfile
+    envVars:
+      - key: PORT
+        value: 5678 # Port interne (doit correspondre au port exposé dans le Dockerfile)
+      - key: RENDER_EXTERNAL_HOSTNAME
+        fromPort: true
+      - key: N8N_BASIC_AUTH_ACTIVE
+        value: "true"
+      - key: N8N_BASIC_AUTH_USER
+        value: "admin"
+      - key: N8N_BASIC_AUTH_PASSWORD
+        value: "monMotDePasseSecurise"
+      - key: EXECUTIONS_DATA_PRUNE
+        value: "true"
+      - key: EXECUTIONS_DATA_MAX_AGE
+        value: "30"
