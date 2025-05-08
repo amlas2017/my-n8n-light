@@ -1,25 +1,26 @@
-# Utilise une image Alpine avec Node.js
-FROM node:18-alpine
+# Dockerfile
 
-# Répertoire de travail dans le conteneur
-WORKDIR /app
+# Choisissez une version spécifique de N8N pour la stabilité.
+# Trouvez les tags ici : https://hub.docker.com/r/n8nio/n8n/tags
+ARG N8N_VERSION=1.36.0 # Remplacez par la version de N8N souhaitée
+FROM n8nio/n8n:${N8N_VERSION}
 
-# Copie package.json et install les dépendances
-COPY package*.json ./
-RUN npm ci --only=production
+# --- Section de personnalisation (Optionnelle) ---
+# Si vous avez besoin d'installer des paquets système supplémentaires, décommentez et adaptez :
+# USER root
+# RUN apt-get update && apt-get install -y \
+#    vips-dev \ # Exemple pour le traitement d'images avec Sharp (si un noeud custom l'utilise)
+#    ffmpeg \   # Exemple pour le traitement vidéo/audio
+#    # ... autres paquets ...
+#    && rm -rf /var/lib/apt/lists/*
+# USER node # Retourner à l'utilisateur non-root 'node' utilisé par N8N
 
-# Copie le reste des fichiers
-COPY . .
+# Si vous avez des fichiers de configuration personnalisés ou des noeuds customs à copier :
+# COPY ./custom-nodes /home/node/.n8n/custom/
+# COPY ./my-n8n-config.json /home/node/.n8n/config
 
-# Définir les variables d'environnement nécessaires
-ENV EXECUTIONS_MODE=queue
-ENV DB_TYPE=sqlite
-ENV N8N_HOST=$RENDER_EXTERNAL_HOSTNAME
-ENV N8N_PROTOCOL=https
-ENV WEBHOOK_URL=${N8N_PROTOCOL}://${N8N_HOST}/
+# N8N écoute sur le port 5678 par défaut, déjà exposé par l'image de base.
+# EXPOSE 5678
 
-# Expose le port dynamique fourni par Render
-EXPOSE $PORT
-
-# Commande de démarrage
-CMD ["node", "server.js"]
+# Le point d'entrée et la commande sont hérités de l'image de base n8nio/n8n
+# Vous n'avez généralement pas besoin de les redéfinir.
