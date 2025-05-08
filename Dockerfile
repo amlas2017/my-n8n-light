@@ -1,5 +1,15 @@
-# Utilise l'image officielle de n8n
-FROM n8nio/n8n:latest
+# Utilise une image Alpine avec Node.js
+FROM node:18-alpine
+
+# Répertoire de travail dans le conteneur
+WORKDIR /app
+
+# Copie package.json et install les dépendances
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Copie le reste des fichiers
+COPY . .
 
 # Définir les variables d'environnement nécessaires
 ENV EXECUTIONS_MODE=queue
@@ -11,5 +21,5 @@ ENV WEBHOOK_URL=${N8N_PROTOCOL}://${N8N_HOST}/
 # Expose le port dynamique fourni par Render
 EXPOSE $PORT
 
-# Remplace la commande par défaut pour utiliser le port dynamique
-CMD ["sh", "-c", "n8n start --port $PORT"]
+# Commande de démarrage
+CMD ["node", "server.js"]
